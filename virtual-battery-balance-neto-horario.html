@@ -1,0 +1,26 @@
+<script type="text/javascript">
+    RED.nodes.registerType('virtual-battery-balance-neto-horario',{
+        category: 'virtual-battery',
+        color: '#DAA520',
+        defaults: {
+            resetTimeout:{value:"60000",required:true}
+        }, 
+        inputs:1,
+        outputs:1,
+        icon: "feed.svg",
+        label: function() {
+            return this.name||"virtual-battery-balance-neto-horario";
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="virtual-battery-balance-neto-horario">
+    <div class="form-row">
+        <label for="node-input-resetTimeout"><i class="fa fa-tag"></i> Timeout in ms to reset the node</label>
+        <input type="text" id="node-input-resetTimeout" placeholder="Reset Timeout">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="virtual-battery-balance-neto-horario">
+    <p>A simple node to gruoup battery slots in balance neto horario </p>
+</script>
