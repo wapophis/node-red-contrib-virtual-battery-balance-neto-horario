@@ -27,21 +27,24 @@ class BalanceNetoHorario{
     getProduced(){
         let count=0;
         this.batterySlots.forEach(function(item){
-            count+=item.producedInWatsH;
+            let slotsInHour=(60*60*1000)/item.length;
+            count+=item.producedInWatsH/slotsInHour;
         });
         return count;
     }
     getFeeded(){
         let count=0;
         this.batterySlots.forEach(function(item){
-            count+=item.feededInWatsH;
+            let slotsInHour=(60*60*1000)/item.length;
+            count+=item.feededInWatsH/slotsInHour;
         });
         return count;
     }
     getConsumed(){
         let count=0;
         this.batterySlots.forEach(function(item){
-            count+=item.consumedInWatsH;
+            let slotsInHour=(60*60*1000)/item.length;
+            count+=item.consumedInWatsH/slotsInHour;
         });
         return count;
     }
@@ -50,9 +53,9 @@ class BalanceNetoHorario{
     get(){
         return {
             balanceNetoHorario:{
-            feeded:this.getFeeded()/12,
-            consumed:this.getConsumed()/12,
-            produced:this.getProduced()/12,
+            feeded:this.getFeeded(),
+            consumed:this.getConsumed(),
+            produced:this.getProduced(),
             startAt:this.startTime,
             endAt:this.endTime,
             isConsolidable:this.isConsolidable
