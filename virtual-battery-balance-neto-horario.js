@@ -97,6 +97,11 @@ module.exports = function(RED) {
         resetTimeout=config.resetTimeout;
         node.log("INIT");
         _readContext();
+
+        this.on('close', function() {
+            _writeContext();
+           });
+        
         node.on('input',function(msg, send, done){
           node.log("Received Battery slot: "+JSON.stringify(msg));
           try{
