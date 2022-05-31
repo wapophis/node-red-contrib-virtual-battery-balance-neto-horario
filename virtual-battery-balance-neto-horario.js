@@ -14,7 +14,7 @@ class BalanceNetoHorario{
         }else{
             this.startTime=LocalDateTime.parse(msg.startTime);
             this.endTime=LocalDateTime.parse(msg.endTime);
-            this.batterySlots=new List();
+            this.batterySlots=msg.batterySlots;
             this.readTimeStamp=msg.readTimeStamp;
             this.length=msg.length;
             this.isConsolidable=msg.isConsolidable;
