@@ -21,7 +21,9 @@ class BalanceNetoHorario{
         }
     }
     addBatterySlot(slot){
-        var slotStart=LocalDateTime.parse(slot.readTimeStamp.toJSON());
+        var slotStart=LocalDateTime.parse(slot.readTimeStamp.toString());
+        console.log(slotStart);
+
         if(slotStart.isBefore(this.startTime)){
             throw "Slot time is before than this slot start time";
         }
@@ -103,15 +105,19 @@ module.exports = function(RED) {
            });
         
         node.on('input',function(msg, send, done){
-          node.log("Received Battery slot: "+JSON.stringify(msg));
+          node.log("Received Battery slot: "+msg);
           try{
+          if(_isJson(msg.payload)){
+            msg.payload=JSON.parse(msg.payload);
+          }
+
           balance.addBatterySlot(msg.payload);
           _writeContext();
           }catch(error){
             node.error(error,"Cannot add battery slot");
           }
           needsResetAndSend(node,send);
-          node.status({fill:"green",shape:"dot",text:"SLOTS IN "+balance.batterySlots.length});        
+          node.status({fill:"green",shape:"dot",text:"SLOTS IN "+balance.batterySlots.length+"|"+balance.get().feeded+"|"+balance.get().produced});        
           done();
         });
     }    
@@ -156,6 +162,15 @@ function _readContext(){
         balance=new BalanceNetoHorario();
     }
 
+}
+
+function _isJson(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
 }
     RED.nodes.registerType("virtual-battery-balance-neto-horario",VirtualBatteryBalanceNetoHorarioNode);
 }
