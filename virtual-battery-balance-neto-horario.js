@@ -86,22 +86,25 @@ class BalanceNetoHorario{
 
 
 module.exports = function(RED) {
-    var balance=null;
-    var lastResetWas=LocalDateTime.now();
-    var resetTimeout=null;
-    var node;
-    var nodeContext;
+    
 
     function VirtualBatteryBalanceNetoHorarioNode(config) {
+        var balance=null;
+        var lastResetWas=LocalDateTime.now();
+        var resetTimeout=null;
+        var node;
+        var nodeContext;
+
+
         RED.nodes.createNode(this,config);
         node=this;
         nodeContext= this.context();
         resetTimeout=config.resetTimeout;
         node.log("INIT");
-        _readContext();
+        _readContext(nodeContext,balance);
 
         this.on('close', function() {
-            _writeContext();
+            _writeContext(nodeContext,balance);
            });
         
         node.on('input',function(msg, send, done){
@@ -112,17 +115,17 @@ module.exports = function(RED) {
           }
 
           balance.addBatterySlot(msg.payload);
-          _writeContext();
+          _writeContext(nodeContext,balance);
           }catch(error){
             node.error(error,"Cannot add battery slot");
           }
-          needsResetAndSend(node,send);
+          needsResetAndSend(balance,node,send);
           node.status({fill:"green",shape:"dot",text:"SLOTS IN "+balance.batterySlots.length+"|"+balance.get().feeded+"|"+balance.get().produced});        
           done();
         });
     }    
 
-function needsResetAndSend(node,send){
+function needsResetAndSend(balance,node,send){
     var msg={payload:"empty"};
     msg.payload=balance.get().balanceNetoHorario;
    
@@ -139,7 +142,7 @@ function needsResetAndSend(node,send){
     
 }
 
-function _writeContext(){
+function _writeContext(nodeContext,balance){
     nodeContext.set("lastPayload",JSON.stringify(balance.get()));
     // this.startTime=LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
     // this.endTime=this.startTime.plusHours(1);
@@ -150,7 +153,7 @@ function _writeContext(){
 
 }
 
-function _readContext(){
+function _readContext(nodeContext,balance){
     let lastPayload=nodeContext.get("lastPayload");
     if(lastPayload!==undefined){
         balance=new BalanceNetoHorario(JSON.parse(lastPayload).balanceNetoHorario);
