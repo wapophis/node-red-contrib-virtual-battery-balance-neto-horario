@@ -22,13 +22,24 @@ class BalanceNetoHorario{
     }
     addBatterySlot(slot){
         var slotStart=LocalDateTime.parse(slot.readTimeStamp.toString());
-        console.log(slotStart);
-
+        
         if(slotStart.isBefore(this.startTime)){
             throw "Slot time is before than this slot start time";
         }
         if(slot.length===null){
             throw "Discarded slot, because no lenght defined";
+        }
+
+        if(slot.consumedInWatsH===undefined || isNaN(slot.consumedInWatsH)){
+            throw "Error in slot data, consumedInWatsH undefined";
+        }
+
+        if(slot.feededInWatsH===undefined || isNaN(slot.feededInWatsH) ){
+            throw "Error in slot data, feededInWatsH undefined";
+        }
+
+        if(slot.producedInWatsH===undefined || isNaN(slot.producedInWatsH) ){
+            throw "Error in slot data, producedInWatsH undefined";
         }
 
         this.batterySlots.add(slot);
@@ -39,6 +50,9 @@ class BalanceNetoHorario{
         this.batterySlots.forEach(function(item){
             let slotsInHour=(60*60*1000)/item.length;
             count+=item.producedInWatsH/slotsInHour;
+            if(isNaN(count)){
+                console.log(item);
+            }
         });
         return count;
     }
@@ -47,6 +61,9 @@ class BalanceNetoHorario{
         this.batterySlots.forEach(function(item){
             let slotsInHour=(60*60*1000)/item.length;
             count+=item.feededInWatsH/slotsInHour;
+            if(isNaN(count)){
+                console.log(item);
+            }
         });
         return count;
     }
@@ -55,6 +72,9 @@ class BalanceNetoHorario{
         this.batterySlots.forEach(function(item){
             let slotsInHour=(60*60*1000)/item.length;
             count+=item.consumedInWatsH/slotsInHour;
+            if(isNaN(count)){
+                console.log(item);
+            }
         });
         return count;
     }
@@ -119,8 +139,9 @@ module.exports = function(RED) {
           }catch(error){
             node.error(error,"Cannot add battery slot");
           }
-          needsResetAndSend(balance,node,send,lastResetWas,resetTimeout);
-          node.status({fill:"green",shape:"dot",text:"SLOTS IN "+balance.batterySlots.length+"|"+balance.get().feeded+"|"+balance.get().produced});        
+          balance=needsResetAndSend(balance,node,send,lastResetWas,resetTimeout);
+          let debugmsg=balance.get();
+          node.status({fill:"green",shape:"dot",text:"SLOTS IN "+balance.batterySlots.length+"|"+debugmsg.balanceNetoHorario.feeded+"|"+debugmsg.balanceNetoHorario.produced});        
           done();
         });
     }    
@@ -139,7 +160,8 @@ function needsResetAndSend(balance,node,send,lastResetWas,resetTimeout){
     
     node.log("Sending:"+JSON.stringify(msg));
     send(msg);
-    
+
+    return balance;
 }
 
 function _writeContext(nodeContext,balance){
