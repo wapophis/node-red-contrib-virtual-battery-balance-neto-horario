@@ -101,7 +101,7 @@ module.exports = function(RED) {
         nodeContext= this.context();
         resetTimeout=config.resetTimeout;
         node.log("INIT");
-        _readContext(nodeContext,balance);
+        balance=_readContext(nodeContext);
 
         this.on('close', function() {
             _writeContext(nodeContext,balance);
@@ -153,17 +153,16 @@ function _writeContext(nodeContext,balance){
 
 }
 
-function _readContext(nodeContext,balance){
+function _readContext(nodeContext){
     let lastPayload=nodeContext.get("lastPayload");
     if(lastPayload!==undefined){
-        balance=new BalanceNetoHorario(JSON.parse(lastPayload).balanceNetoHorario);
+        return balance=new BalanceNetoHorario(JSON.parse(lastPayload).balanceNetoHorario);
         // lastPayload.batterySlots.forEach(element=>{
         //     balance.addBatterySlot(element);
         // });
 
-    }else{
-        balance=new BalanceNetoHorario();
     }
+    return new BalanceNetoHorario();
 
 }
 
