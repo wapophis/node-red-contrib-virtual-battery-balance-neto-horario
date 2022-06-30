@@ -119,13 +119,13 @@ module.exports = function(RED) {
           }catch(error){
             node.error(error,"Cannot add battery slot");
           }
-          needsResetAndSend(balance,node,send);
+          needsResetAndSend(balance,node,send,lastResetWas);
           node.status({fill:"green",shape:"dot",text:"SLOTS IN "+balance.batterySlots.length+"|"+balance.get().feeded+"|"+balance.get().produced});        
           done();
         });
     }    
 
-function needsResetAndSend(balance,node,send){
+function needsResetAndSend(balance,node,send,lastResetWas){
     var msg={payload:"empty"};
     msg.payload=balance.get().balanceNetoHorario;
    
