@@ -110,35 +110,19 @@ module.exports = function(RED) {
 
     function VirtualBatteryBalanceNetoHorarioNode(config) {
         var balance=null;
-        var lastResetWas=LocalDateTime.now();
-        var resetTimeout=null;
+        const reset={lastResetWas:LocalDateTime.now(),resetTimeout:null};
+       
         var node;
         var nodeContext;
 
 
-        function needsResetAndSend(balance,node,send,lastResetWas,resetTimeout){
-            var msg={payload:"empty"};
-            msg.payload=balance.get().balanceNetoHorario;
-           
-            if(balance.endTime.isBefore(LocalDateTime.now()) || LocalDateTime.now().isAfter(lastResetWas.plusSeconds(resetTimeout/1000))){
-                balance.endTime=LocalDateTime.now();
-                balance.isConsolidable=true;
-                msg.payload=balance.get().balanceNetoHorario;
-                balance=new BalanceNetoHorario();
-                lastResetWas=LocalDateTime.now();
-            }
-            
-            node.log("Sending:"+JSON.stringify(msg));
-            send(msg);
-        
-            return balance;
-        }
+       
 
 
         RED.nodes.createNode(this,config);
         node=this;
         nodeContext= this.context();
-        resetTimeout=config.resetTimeout;
+        reset.resetTimeout=config.resetTimeout;
         node.log("INIT");
         balance=_readContext(nodeContext);
 
@@ -156,16 +140,33 @@ module.exports = function(RED) {
           balance.addBatterySlot(msg.payload);
           _writeContext(nodeContext,balance);
           }catch(error){
+            node.log(error);
             node.error(error,"Cannot add battery slot");
           }
-          balance=needsResetAndSend(balance,node,send,lastResetWas,resetTimeout);
+          balance=needsResetAndSend(balance,node,send,reset);
           let debugmsg=balance.get();
           node.status({fill:"green",shape:"dot",text:"SLOTS IN "+balance.batterySlots.length+"|"+debugmsg.balanceNetoHorario.feeded+"|"+debugmsg.balanceNetoHorario.produced});        
           done();
         });
     }    
 
-
+    function needsResetAndSend(balance,node,send,reset){
+        var msg={payload:"empty"};
+        msg.payload=balance.get().balanceNetoHorario;
+       
+        if(balance.endTime.isBefore(LocalDateTime.now()) || LocalDateTime.now().isAfter(reset.lastResetWas.plusSeconds(reset.resetTimeout/1000))){
+            balance.endTime=LocalDateTime.now();
+            balance.isConsolidable=true;
+            msg.payload=balance.get().balanceNetoHorario;
+            balance=new BalanceNetoHorario();
+            reset.lastResetWas=LocalDateTime.now();
+        }
+        
+        node.log("Sending:"+JSON.stringify(msg));
+        send(msg);
+    
+        return balance;
+    }
 
 function _writeContext(nodeContext,balance){
     nodeContext.set("lastPayload",JSON.stringify(balance.get()));
