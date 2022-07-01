@@ -116,6 +116,25 @@ module.exports = function(RED) {
         var nodeContext;
 
 
+        function needsResetAndSend(balance,node,send,lastResetWas,resetTimeout){
+            var msg={payload:"empty"};
+            msg.payload=balance.get().balanceNetoHorario;
+           
+            if(balance.endTime.isBefore(LocalDateTime.now()) || LocalDateTime.now().isAfter(lastResetWas.plusSeconds(resetTimeout/1000))){
+                balance.endTime=LocalDateTime.now();
+                balance.isConsolidable=true;
+                msg.payload=balance.get().balanceNetoHorario;
+                balance=new BalanceNetoHorario();
+                lastResetWas=LocalDateTime.now();
+            }
+            
+            node.log("Sending:"+JSON.stringify(msg));
+            send(msg);
+        
+            return balance;
+        }
+
+
         RED.nodes.createNode(this,config);
         node=this;
         nodeContext= this.context();
@@ -146,23 +165,7 @@ module.exports = function(RED) {
         });
     }    
 
-function needsResetAndSend(balance,node,send,lastResetWas,resetTimeout){
-    var msg={payload:"empty"};
-    msg.payload=balance.get().balanceNetoHorario;
-   
-    if(balance.endTime.isBefore(LocalDateTime.now()) || LocalDateTime.now().isAfter(lastResetWas.plusSeconds(resetTimeout/1000))){
-        balance.endTime=LocalDateTime.now();
-        balance.isConsolidable=true;
-        msg.payload=balance.get().balanceNetoHorario;
-        balance=new BalanceNetoHorario();
-        lastResetWas=LocalDateTime.now();
-    }
-    
-    node.log("Sending:"+JSON.stringify(msg));
-    send(msg);
 
-    return balance;
-}
 
 function _writeContext(nodeContext,balance){
     nodeContext.set("lastPayload",JSON.stringify(balance.get()));
