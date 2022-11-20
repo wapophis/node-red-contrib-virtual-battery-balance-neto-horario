@@ -1,8 +1,10 @@
 const { LocalDate } = require("@js-joda/core");
 const List = require("collections/list");
 const LocalDateTime= require("@js-joda/core").LocalDateTime;
+const NodeBalanceNetoHorario=require("./build/NodeBalanceNetoHorario.js");
 
-class BalanceNetoHorario{
+
+/*class BalanceNetoHorario{
     constructor(msg){
         if(msg===undefined){
         this.startTime=LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
@@ -103,54 +105,42 @@ class BalanceNetoHorario{
     
     
 }
-
+*/
 
 module.exports = function(RED) {
     
 
     function VirtualBatteryBalanceNetoHorarioNode(config) {
+        
         var balance=null;
-        const reset={lastResetWas:LocalDateTime.now(),resetTimeout:null};
+        //const reset={lastResetWas:LocalDateTime.now(),resetTimeout:null};
        
         var node;
         var nodeContext;
 
-
-       
-
-
         RED.nodes.createNode(this,config);
         node=this;
         nodeContext= this.context();
-        reset.resetTimeout=config.resetTimeout;
+        var nodeBalanceNetoHorario=new NodeBalanceNetoHorario.NodeBalanceNetoHorario(node,config);
+        nodeBalanceNetoHorario.setNodeContext(nodeContext);
+
+      //  reset.resetTimeout=config.resetTimeout;
         node.log("INIT");
-        balance=_readContext(nodeContext);
+      //  balance=_readContext(nodeContext);
+        
+        nodeBalanceNetoHorario.unSerialize();
 
         this.on('close', function() {
-            _writeContext(nodeContext,balance);
+            nodeBalanceNetoHorario.serialize();
            });
         
         node.on('input',function(msg, send, done){
-          node.log("Received Battery slot: "+msg);
-          try{
-          if(_isJson(msg.payload)){
-            msg.payload=JSON.parse(msg.payload);
-          }
-
-          balance.addBatterySlot(msg.payload);
-          _writeContext(nodeContext,balance);
-          }catch(error){
-            node.log(error);
-            node.error(error,"Cannot add battery slot");
-          }
-          balance=needsResetAndSend(balance,node,send,reset);
-          let debugmsg=balance.get();
-          node.status({fill:"green",shape:"dot",text:"SLOTS IN "+balance.batterySlots.length+"|"+debugmsg.balanceNetoHorario.feeded+"|"+debugmsg.balanceNetoHorario.produced});        
-          done();
+            nodeBalanceNetoHorario.onInput(msg,send,done);
+         
         });
     }    
 
-    function needsResetAndSend(balance,node,send,reset){
+   /* function needsResetAndSend(balance,node,send,reset){
         var msg={payload:"empty"};
         msg.payload=balance.get().balanceNetoHorario;
        
@@ -166,9 +156,9 @@ module.exports = function(RED) {
         send(msg);
     
         return balance;
-    }
+    }*/
 
-function _writeContext(nodeContext,balance){
+/*function _writeContext(nodeContext,balance){
     nodeContext.set("lastPayload",JSON.stringify(balance.get()));
     // this.startTime=LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
     // this.endTime=this.startTime.plusHours(1);
@@ -190,15 +180,15 @@ function _readContext(nodeContext){
     }
     return new BalanceNetoHorario();
 
-}
+}*/
 
-function _isJson(str) {
+/*function _isJson(str) {
     try {
         JSON.parse(str);
     } catch (e) {
         return false;
     }
     return true;
-}
+}*/
     RED.nodes.registerType("virtual-battery-balance-neto-horario",VirtualBatteryBalanceNetoHorarioNode);
 }

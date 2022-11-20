@@ -18,6 +18,10 @@
   },
   "dependencies": {
     "@js-joda/core": "^5.2.0",
-    "collections": "^5.1.13"
+    "collections": "^5.1.13",
+    "@virtualbat/entities": "file:../node-red-contrib-virtual-battery-entities"
+  }
+  ,"devDependencies": {
+    "typescript": "^4.7.4"
   }
 }
