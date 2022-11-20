@@ -12,9 +12,8 @@
   "keywords": ["node-red","balance","neto","horario"],
   "node-red": {
     "nodes": {
-      "virtual-battery-balance-neto-horario": "virtual-battery-balance-neto-horario.js"
-      
-    }
+      "virtual-battery-balance-neto-horario": "virtual-battery-balance-neto-horario.js"    
+    },"version": ">=2.0.0"
   },
   "dependencies": {
     "@js-joda/core": "^5.2.0",
