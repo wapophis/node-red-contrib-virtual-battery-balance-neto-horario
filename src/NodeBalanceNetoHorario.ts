@@ -60,7 +60,10 @@ export class NodeBalanceNetoHorario{
             //     balance.addBatterySlot(element);
             // });
     
+        }else{
+            this.balance=new BalanceNetoHorario(undefined);
         }
+
         return this.balance;
     }
 

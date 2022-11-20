@@ -56,6 +56,9 @@ class NodeBalanceNetoHorario {
             //     balance.addBatterySlot(element);
             // });
         }
+        else {
+            this.balance = new BalanceNetoHorario_js_1.BalanceNetoHorario(undefined);
+        }
         return this.balance;
     }
     needsResetAndSend(send) {
