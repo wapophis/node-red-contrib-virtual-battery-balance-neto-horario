@@ -1,6 +1,6 @@
 {
   "name": "@virtualbat/balance-neto-horario",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Get readings from solax inputs and calculate a battery slot which represents de energy transferred to the virtual battery in a range time.",
   "main": "index.js",
   "scripts": {
@@ -18,7 +18,7 @@
   "dependencies": {
     "@js-joda/core": "^5.2.0",
     "collections": "^5.1.13",
-    "@virtualbat/entities": "file:../node-red-contrib-virtual-battery-entities"
+    "@virtualbat/entities": "1.0.1"
   }
   ,"devDependencies": {
     "typescript": "^4.7.4"
